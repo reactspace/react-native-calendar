@@ -27,10 +27,6 @@ export default class Day extends PureComponent {
     onPressArgs: PropTypes.object,
   };
 
-  shouldComponentUpdate(nextProps) {
-    return !_isEqual(nextProps, this.props);
-  }
-
   dayCircleStyle = (isWeekend, isSelected, isToday, event) => {
     const { customStyle } = this.props;
     const dayCircleStyle = [styles.dayCircleFiller, customStyle.dayCircleFiller];
