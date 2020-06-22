@@ -1,20 +1,18 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import {
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  Dimensions,
-  StyleSheet,
 } from 'react-native';
-import PropTypes from 'prop-types';
 
 import styles from './styles';
 
-export default class Day extends Component {
+export default class Day extends PureComponent {
   static defaultProps = {
     customStyle: {},
-  }
+  };
 
   static propTypes = {
     caption: PropTypes.any,
@@ -25,8 +23,12 @@ export default class Day extends Component {
     isToday: PropTypes.bool,
     isWeekend: PropTypes.bool,
     onPress: PropTypes.func,
-    onLongPress: PropTypes.func,
     showEventIndicators: PropTypes.bool,
+    onPressArgs: PropTypes.object,
+  };
+
+  shouldComponentUpdate(nextProps) {
+    return !_isEqual(nextProps, this.props);
   }
 
   dayCircleStyle = (isWeekend, isSelected, isToday, event) => {
@@ -49,7 +51,7 @@ export default class Day extends Component {
       }
     }
     return dayCircleStyle;
-  }
+  };
 
   dayTextStyle = (isWeekend, isSelected, isToday, event) => {
     const { customStyle } = this.props;
@@ -67,24 +69,7 @@ export default class Day extends Component {
       dayTextStyle.push(styles.hasEventText, customStyle.hasEventText, event.hasEventText)
     }
     return dayTextStyle;
-  }
-
-  dayButtonStyle = (isWeekend, isSelected, isToday, event) => {
-    const { customStyle } = this.props;
-    let dayButtonStyle, dayWidth;
-
-    if (customStyle.hasOwnProperty('dayButton') && StyleSheet.flatten(customStyle.dayButton).hasOwnProperty('width')) {
-      dayButtonStyle = [styles.dayButton, customStyle.dayButton];
-    } else {
-      dayWidth = Dimensions.get('window').width / 7;
-      dayButtonStyle = [styles.dayButton, customStyle.dayButton, {width: dayWidth}];
-    }
-
-    if (isWeekend) {
-      dayButtonStyle.push(styles.weekendDayButton, customStyle.weekendDayButton);
-    }
-    return dayButtonStyle;
-  }
+  };
 
   render() {
     let { caption, customStyle } = this.props;
@@ -97,28 +82,17 @@ export default class Day extends Component {
       showEventIndicators,
     } = this.props;
 
-    let dayButtonFillerStyle, dayWidth;
-    if (customStyle.hasOwnProperty('dayButtonFiller') && StyleSheet.flatten(customStyle.dayButtonFiller).hasOwnProperty('width')) {
-      dayButtonFillerStyle = [styles.dayButtonFiller, customStyle.dayButtonFiller];
-    } else {
-      dayWidth = Dimensions.get('window').width / 7;
-      dayButtonFillerStyle = [styles.dayButtonFiller, customStyle.dayButtonFiller, {width: dayWidth}];
-    }
-
     return filler
       ? (
         <TouchableWithoutFeedback>
-          <View style={dayButtonFillerStyle}>
+          <View style={[styles.dayButtonFiller, customStyle.dayButtonFiller]}>
             <Text style={[styles.day, customStyle.day]} />
           </View>
         </TouchableWithoutFeedback>
       )
       : (
-        <TouchableOpacity
-          onPress={this.props.onPress}
-          onLongPress={this.props.onLongPress}
-        >
-          <View style={this.dayButtonStyle(isWeekend, isSelected, isToday, event)}>
+        <TouchableOpacity onPress={() => this.props.onPress(this.props.onPressArgs)}>
+          <View style={[styles.dayButton, customStyle.dayButton]}>
             <View style={this.dayCircleStyle(isWeekend, isSelected, isToday, event)}>
               <Text style={this.dayTextStyle(isWeekend, isSelected, isToday, event)}>{caption}</Text>
             </View>
